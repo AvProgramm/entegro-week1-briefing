@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 1 Briefing - Entegro Health × Time to First Bite</title>
+<style>
+  :root {
+    --bg: #0e1512;
+    --panel: #16211c;
+    --ink: #eef5f1;
+    --muted: #9fb5aa;
+    --accent: #34d399;
+    --accent-deep: #1f6f54;
+    --warn: #fbbf24;
+    --card: #1c2a23;
+    --border: #2a3d33;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; overflow: hidden; }
+
+  .deck { height: 100vh; position: relative; }
+  .slide {
+    position: absolute; inset: 0; display: none;
+    flex-direction: column; justify-content: center;
+    padding: 5vh 8vw; opacity: 0; transform: translateY(12px);
+    transition: opacity .45s ease, transform .45s ease;
+  }
+  .slide.active { display: flex; opacity: 1; transform: translateY(0); }
+
+  .kicker { color: var(--accent); font-size: clamp(13px, 1.4vw, 18px);
+    letter-spacing: .18em; text-transform: uppercase; font-weight: 600; margin-bottom: 14px; }
+  h1 { font-size: clamp(30px, 4.6vw, 62px); line-height: 1.08; font-weight: 750; }
+  h2 { font-size: clamp(24px, 3.2vw, 44px); margin-bottom: 26px; font-weight: 700; }
+  .sub { color: var(--muted); font-size: clamp(15px, 1.7vw, 22px); margin-top: 18px; max-width: 60ch; line-height: 1.5; }
+  .sub.wide { max-width: none; }
+
+  ul.points { list-style: none; margin-top: 8px; }
+  ul.points li { position: relative; padding: 10px 0 10px 34px;
+    font-size: clamp(15px, 1.65vw, 22px); line-height: 1.45; color: #d7e5de; }
+  ul.points li::before { content: "▸"; position: absolute; left: 4px; color: var(--accent); }
+  ul.points li strong { color: var(--ink); }
+
+  .grid { display: grid; gap: 18px; margin-top: 10px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; }
+  .card h3 { color: var(--accent); font-size: clamp(15px, 1.6vw, 21px); margin-bottom: 10px; }
+  .card p, .card li { color: #cfe0d7; font-size: clamp(13px, 1.35vw, 18px); line-height: 1.5; }
+  .card ul { list-style: none; }
+  .card ul li { padding: 4px 0 4px 18px; position: relative; }
+  .card ul li::before { content: "•"; position: absolute; left: 2px; color: var(--accent); }
+  .card.niche { border-color: var(--warn); }
+  .card.niche h3 { color: var(--warn); }
+  .price { font-size: clamp(22px, 2.6vw, 34px); font-weight: 700; color: var(--ink); margin: 6px 0; }
+
+  .bignum { font-size: clamp(38px, 5.5vw, 84px); font-weight: 800; color: var(--accent); line-height: 1; }
+  .bignum .unit { font-size: .42em; font-weight: 700; }
+  .bignum.warn { color: var(--warn); }
+  .biglabel { color: var(--muted); font-size: clamp(13px, 1.4vw, 18px); margin-top: 10px; line-height: 1.45; }
+
+  .tag { display: inline-block; background: var(--accent-deep); color: #eafff5;
+    border-radius: 999px; padding: 6px 16px; font-size: clamp(12px, 1.2vw, 15px);
+    margin: 4px 6px 4px 0; }
+
+  table.tbl { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .tbl th, .tbl td { border: 1px solid var(--border); padding: 9px 12px; text-align: left;
+    font-size: clamp(11px, 1.2vw, 16px); color: #cfe0d7; line-height: 1.45; vertical-align: top; }
+  .tbl th { background: var(--accent-deep); color: #eafff5; }
+  .tbl td strong { color: var(--ink); }
+
+  /* concept diagrams */
+  .diagram { width: 100%; margin-top: 14px; }
+  .diagram svg { width: 100%; height: auto; display: block; }
+  .flow { display: flex; align-items: stretch; gap: 10px; margin-top: 26px; flex-wrap: wrap; }
+  .flow .step { flex: 1 1 0; min-width: 140px; background: var(--card); border: 1px solid var(--accent-deep);
+    border-radius: 10px; padding: 12px 14px; font-size: clamp(12px, 1.3vw, 17px); color: #d7e5de;
+    display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.4; }
+  .flow .step.last { border-color: var(--accent); color: var(--ink); font-weight: 600; }
+  .flow .arr { color: var(--accent); font-size: clamp(18px, 2vw, 26px); font-weight: 700;
+    display: flex; align-items: center; }
+
+  .footer-note { position: absolute; bottom: 3.2vh; left: 8vw; right: 8vw;
+    color: var(--muted); font-size: clamp(11px, 1.05vw, 14px); }
+
+  /* speaker notes */
+  .note { display: none; }
+  #notesPanel {
+    display: none; position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+    width: min(92vw, 940px); background: var(--panel); border: 1px solid var(--accent-deep);
+    border-radius: 12px; padding: 14px 18px; z-index: 11;
+    font-size: clamp(13px, 1.3vw, 16px); line-height: 1.6; color: var(--ink);
+    box-shadow: 0 8px 30px rgba(0,0,0,.45);
+  }
+  #notesPanel .note-title { color: var(--accent); font-weight: 700; font-size: 12px;
+    letter-spacing: .14em; text-transform: uppercase; margin-bottom: 6px; }
+
+  /* chrome */
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent);
+    width: 0%; transition: width .3s ease; z-index: 10; }
+  .counter { position: fixed; bottom: 18px; right: 24px; color: var(--muted);
+    font-size: 14px; z-index: 10; font-variant-numeric: tabular-nums; }
+  .navhint { position: fixed; bottom: 18px; left: 24px; color: var(--muted);
+    font-size: 13px; z-index: 10; opacity: .8; }
+  .navbtns { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 10; }
+  .navbtns button { background: var(--panel); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 18px; font-size: 16px; cursor: pointer; }
+  .navbtns button:hover { border-color: var(--accent); color: var(--accent); }
+  .navbtns button.on { border-color: var(--accent); color: var(--accent); }
+
+  .titlewrap { max-width: 70vw; }
+  .logo-row { display: flex; gap: 12px; margin-bottom: 3vh; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 · Title -->
+  <section class="slide active">
+    <div class="titlewrap">
+      <div class="logo-row">
+        <span class="tag">Entegro Health</span><span class="tag">Time to First Bite</span>
+        <span class="tag">TeaMWork 2026 · Warwick × Monash</span>
+      </div>
+      <div class="kicker">Week 1 Briefing</div>
+      <h1>Growth Strategy in a Recessionary Climate</h1>
+      <p class="sub">Understanding the product, the company, the go-to-market approach, and the United States wellness market landscape.</p>
+      <p class="sub" style="margin-top:26px">Mentor: Nikhil Kalanjee &nbsp;·&nbsp; 6 July 2026</p>
+    </div>
+    <aside class="note">
+      Thank Nikhil for the time.<br>
+      Week 1 goal: understand the product, the company, the routes to market, and the United States landscape.<br>
+      A written 2-3 page briefing document follows after the call.
+    </aside>
+  </section>
+
+  <!-- 2 · Agenda -->
+  <section class="slide">
+    <div class="kicker">Agenda</div>
+    <h2>What we cover today</h2>
+    <ul class="points">
+      <li><strong>The client</strong> - who Entegro Health and Time to First Bite are</li>
+      <li><strong>The product</strong> - the Flourish range, what is shared and what differs</li>
+      <li><strong>Positioning</strong> - brand identity, values, and customer personas</li>
+      <li><strong>Go-to-market</strong> - the channels, their trade-offs, and where control lives</li>
+      <li><strong>The United States market</strong> - the numbers, the drivers, and the squeeze</li>
+      <li><strong>Implications &amp; our recommendation</strong> - where we'd start</li>
+      <li><strong>Road map &amp; questions</strong> - how each week builds to the final strategy</li>
+    </ul>
+    <aside class="note">
+      Client, product, positioning and personas, channels, market, recommendation, road map, questions.<br>
+      About eleven minutes of talking; the questions at the end are the most important part.
+    </aside>
+  </section>
+
+  <!-- 3 · The client -->
+  <section class="slide">
+    <div class="kicker">The Client</div>
+    <h2>Two organisations, one goal: grow through the downturn</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Entegro Health</h3>
+        <ul>
+          <li>Manufactures <strong>Flourish</strong>, a living liquid probiotic</li>
+          <li>Small-batch, naturally fermented - never freeze-dried</li>
+          <li>4.94★ average across 191 verified store reviews</li>
+          <li>Sells direct-to-consumer (Shopify), via subscription, consultants &amp; wholesale partners</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Time to First Bite</h3>
+        <ul>
+          <li>Growth consultancy: <em>"find the leak, ship the test, hit the number"</em></li>
+          <li>Zero-to-One validation (14 days) · six-week go-to-market strategy · embedded execution</li>
+          <li>100+ brands advised, around 500 campaigns run</li>
+          <li>Case work includes Amazon direct-to-consumer work for a gut-health brand and a Walmart listing for a probiotics company</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="note">
+      Flourish: living liquid probiotic, never freeze-dried.<br>
+      Customer proof: 4.94 stars across 191 verified reviews - strong for a brand this size.<br>
+      Time to First Bite: fast, test-driven growth consultancy.<br>
+      Their case work already touches Amazon and Walmart for probiotics - ask about that later.
+    </aside>
+  </section>
+
+  <!-- 4 · Product range -->
+  <section class="slide">
+    <div class="kicker">The Product</div>
+    <h2>The Flourish range - narrow and focused</h2>
+    <div class="grid g3">
+      <div class="card">
+        <h3>Flourish Original</h3>
+        <div class="price">$34.95</div>
+        <p>Core living liquid probiotic. Glass or plastic bottle. Subscription available. About $1.17 per daily serving.</p>
+      </div>
+      <div class="card">
+        <h3>Flourish Junior</h3>
+        <div class="price">$34.95</div>
+        <p>Family version - milder, slightly sweet apple-cider taste. Not only for children.</p>
+      </div>
+      <div class="card">
+        <h3>Flourish TO GO</h3>
+        <div class="price">$29.95</div>
+        <p>Travel-size 4-pack of the original formulation. Lowers the barrier for trial, travel and gifting.</p>
+      </div>
+    </div>
+    <p class="sub wide">11 strains · 5 families · 8 billion+ colony-forming units per dose · organic, not genetically modified, allergen-free, vegan &amp; keto friendly · every batch third-party verified<br>
+    Plus accessories: dosing glass, Tru-Pour spout, Flourish spoon (also in starter kits), a sustainable market tote, and branded merchandise.</p>
+    <aside class="note">
+      Original and Junior $34.95; TO GO four-pack $29.95.<br>
+      11 strains, 5 families, 8 billion+ colony-forming units, every batch third-party verified.<br>
+      Accessories (dosing glass, spout, spoon, starter kits) support the daily ritual.<br>
+      Key number for later: about $1.17 per daily serving.
+    </aside>
+  </section>
+
+  <!-- 5 · Same core, different taste (+ concept diagram) -->
+  <section class="slide">
+    <div class="kicker">The Product</div>
+    <h2>One formula family - the real difference is taste and occasion</h2>
+    <div class="diagram">
+      <svg viewBox="0 0 920 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Concept map: one living formula branching into three formats">
+        <rect x="285" y="8" width="350" height="48" rx="10" style="fill:var(--accent-deep)"/>
+        <text x="460" y="30" text-anchor="middle" style="fill:#eafff5;font-size:17px;font-weight:700">One living liquid formula</text>
+        <text x="460" y="48" text-anchor="middle" style="fill:#c9ede0;font-size:13px">11 strains · third-party tested · never freeze-dried</text>
+        <line x1="460" y1="56" x2="160" y2="112" style="stroke:var(--accent);stroke-width:2"/>
+        <line x1="460" y1="56" x2="460" y2="112" style="stroke:var(--accent);stroke-width:2"/>
+        <line x1="460" y1="56" x2="760" y2="112" style="stroke:var(--accent);stroke-width:2"/>
+        <rect x="30" y="112" width="260" height="82" rx="10" style="fill:var(--card);stroke:var(--border)"/>
+        <text x="160" y="138" text-anchor="middle" style="fill:var(--ink);font-size:16px;font-weight:700">Original</text>
+        <text x="160" y="158" text-anchor="middle" style="fill:#cfe0d7;font-size:13px">Sugarcane-molasses base · fermented flavour</text>
+        <text x="160" y="178" text-anchor="middle" style="fill:var(--accent);font-size:13px;font-weight:600">The home routine</text>
+        <rect x="330" y="112" width="260" height="82" rx="10" style="fill:var(--card);stroke:var(--border)"/>
+        <text x="460" y="138" text-anchor="middle" style="fill:var(--ink);font-size:16px;font-weight:700">Junior</text>
+        <text x="460" y="158" text-anchor="middle" style="fill:#cfe0d7;font-size:13px">Sweet-sorghum base · milder apple-cider taste</text>
+        <text x="460" y="178" text-anchor="middle" style="fill:var(--accent);font-size:13px;font-weight:600">First-timers &amp; families</text>
+        <rect x="630" y="112" width="260" height="82" rx="10" style="fill:var(--card);stroke:var(--border)"/>
+        <text x="760" y="138" text-anchor="middle" style="fill:var(--ink);font-size:16px;font-weight:700">TO GO</text>
+        <text x="760" y="158" text-anchor="middle" style="fill:#cfe0d7;font-size:13px">Travel-size of the original formulation</text>
+        <text x="760" y="178" text-anchor="middle" style="fill:var(--accent);font-size:13px;font-weight:600">On-the-go</text>
+      </svg>
+    </div>
+    <p class="sub wide">Every version shares the same core benefit - daily gut-health support. Differentiation is by taste preference and consumption occasion, not by who is allowed to take it: anyone at any age can take either version.</p>
+    <aside class="note">
+      Same core product across the range - the difference is taste and occasion, not audience.<br>
+      Original: fermented molasses flavour. Junior: milder apple-cider taste from sorghum - wins first-time users and families.<br>
+      TO GO covers the on-the-go occasion with the original formula.
+    </aside>
+  </section>
+
+  <!-- 6 · Positioning -->
+  <section class="slide">
+    <div class="kicker">Positioning</div>
+    <h2>Premium natural wellness - distinctive, but with friction</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Strengths</h3>
+        <ul>
+          <li>Genuinely different format: <strong>living liquid</strong>, not freeze-dried capsules - the bacteria stay alive in a liquid that feeds them and helps them survive stomach acid</li>
+          <li>Evidence hooks: acid-stable, third-party tested, strain diversity</li>
+          <li>Gut health is culturally mainstream (Netflix's <em>Hack Your Health</em>)</li>
+          <li>Strong reviews and an education-led brand voice</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Adoption barriers</h3>
+        <ul>
+          <li>Taste and daily-routine habit formation</li>
+          <li>Storage &amp; format versus grab-a-capsule convenience</li>
+          <li>Needs more consumer education than gummies/capsules</li>
+          <li>Premium price point in a value-hunting market</li>
+        </ul>
+      </div>
+    </div>
+    <aside class="note">
+      Premium natural wellness product, not a mass supplement.<br>
+      The liquid keeps the bacteria alive and helps them survive stomach acid - that's the story.<br>
+      Be honest about friction: taste, fridge routine, education needed, premium price.<br>
+      The strategy has to work with both columns.
+    </aside>
+  </section>
+
+  <!-- 7 · Brand identity & target customer -->
+  <section class="slide">
+    <div class="kicker">Positioning</div>
+    <h2>Gut health as everyday wellness - for the whole household</h2>
+    <div class="grid g3">
+      <div class="card">
+        <h3>Clean-label commitment</h3>
+        <p>No artificial flavours, colours, sweeteners or preservatives - reinforced by third-party lab testing on every batch.</p>
+      </div>
+      <div class="card">
+        <h3>Trust &amp; transparency</h3>
+        <p>A 30-day money-back guarantee for new customers (the "30-day challenge") lowers the risk of the first purchase.</p>
+      </div>
+      <div class="card">
+        <h3>A household product</h3>
+        <p>Framed for the whole family - women, men and children, at home and travelling. End consumers range from infants to older adults.</p>
+      </div>
+    </div>
+    <p class="sub wide">Entegro positions Flourish as more than a digestive supplement: a balanced gut supports overall everyday wellbeing. Target buyers are health-conscious adults and families.</p>
+    <aside class="note">
+      Brand belief: balanced gut bacteria support overall wellbeing - not just digestion.<br>
+      Two core values: clean label (no artificial anything) and trust (30-day money-back guarantee).<br>
+      A household product: buyers are health-conscious adults and families; end consumers span infants to older adults.
+    </aside>
+  </section>
+
+  <!-- 8 · Personas & new niche -->
+  <section class="slide">
+    <div class="kicker">Positioning</div>
+    <h2>Who buys - four personas and a possible new niche</h2>
+    <div class="grid g3">
+      <div class="card">
+        <h3>The Sufferer</h3>
+        <p>Ongoing gut issues; capsules didn't work. Wants proof: strain science, testimonials, the money-back guarantee. Found via search and practitioners.</p>
+      </div>
+      <div class="card">
+        <h3>The Optimiser</h3>
+        <p>Gen Z / millennial wellness-router. Discovers on TikTok and Instagram; wants clean label and convenience; natural subscriber.</p>
+      </div>
+      <div class="card">
+        <h3>The Family Buyer</h3>
+        <p>Parent buying for the household - Junior as the entry point. Values safety, allergen-free formulation, and the guarantee.</p>
+      </div>
+      <div class="card">
+        <h3>The Referred</h3>
+        <p>Sent by a health practitioner or wellness centre. Highest trust, least price-sensitive; served by the business-partner channel.</p>
+      </div>
+      <div class="card niche">
+        <h3>Possible new niche: weight-loss medication companions</h3>
+        <p>People on glucagon-like peptide-1 (Ozempic-style) medications managing digestive side effects and new eating routines - a fast-growing group that already thinks daily about gut comfort. To validate in Week 3.</p>
+      </div>
+    </div>
+    <aside class="note">
+      Four personas: Sufferer (needs proof), Optimiser (social discovery, subscribes),<br>
+      Family Buyer (Junior entry, safety), Referred (practitioner trust, least price-sensitive).<br>
+      New-niche hypothesis: people on weight-loss medications managing digestive side effects - fast-growing, gut-aware.<br>
+      Flag it as a hypothesis to validate in Week 3 competitive research.
+    </aside>
+  </section>
+
+  <!-- 9 · Go-to-market channels -->
+  <section class="slide">
+    <div class="kicker">Go-To-Market Today</div>
+    <h2>Six channels - broad for a small brand</h2>
+    <div class="grid g3">
+      <div class="card"><h3>Direct-to-consumer ecommerce</h3><p>Shopify store, reviews, first-order discount, 30-day challenge.</p></div>
+      <div class="card"><h3>Subscription</h3><p>Autoship with free shipping on 2+ bottles - margin &amp; retention engine.</p></div>
+      <div class="card"><h3>Consultants</h3><p>Commission, cobranded sites, partner portal, no inventory needed.</p></div>
+      <div class="card"><h3>Business partners</h3><p>Wholesale + drop-ship for practitioners, wellness centres, specialty stores.</p></div>
+      <div class="card"><h3>Education content</h3><p>Gut-health articles, frequently asked questions, testimonials - a trust-building sales cycle.</p></div>
+      <div class="card"><h3>Social &amp; referral</h3><p>Instagram, Facebook, YouTube, Pinterest, affiliates - relationship-led growth.</p></div>
+    </div>
+    <p class="footer-note">⚠ Flourish Original showed "sold out" during our research - supply capacity is a live question for the mentor.</p>
+    <aside class="note">
+      Six channels is broad for a small team.<br>
+      Opportunity: pick the highest-conviction channel and sharpen the offer there.<br>
+      Flag the "sold out" status on Original - ask whether supply is a constraint.
+    </aside>
+  </section>
+
+  <!-- 10 · Channel trade-offs -->
+  <section class="slide">
+    <div class="kicker">Go-To-Market Today</div>
+    <h2>Where control, reach and margin actually live</h2>
+    <table class="tbl">
+      <tr><th>Channel</th><th>Type</th><th>Upside</th><th>Trade-off</th></tr>
+      <tr>
+        <td><strong>Official website</strong></td>
+        <td>Direct-to-consumer</td>
+        <td>Most control over pricing, branding, promotions and customer data; starter kits and subscription benefits reward loyalty</td>
+        <td>Entegro carries shipping, advertising, fulfilment and customer service itself</td>
+      </tr>
+      <tr>
+        <td><strong>Amazon</strong></td>
+        <td>Third-party marketplace</td>
+        <td>Huge customer base and strong product visibility</td>
+        <td>Less control of the customer relationship; intense price competition</td>
+      </tr>
+      <tr>
+        <td><strong>Major retailers</strong></td>
+        <td>First-party (retailer buys wholesale)</td>
+        <td>Broad retail reach and brand credibility</td>
+        <td>The retailer controls pricing, promotions and customer data</td>
+      </tr>
+      <tr>
+        <td><strong>People-based recommendations</strong></td>
+        <td>Consultants, affiliates, referrals</td>
+        <td>High trust through personal recommendation; reaches specific groups</td>
+        <td>Hard to guarantee sales quality, consistency and scale</td>
+      </tr>
+    </table>
+    <p class="sub wide">Working conclusion: the official website is the most favourable channel - most control over pricing, customer relationships and repeat purchase - with Amazon and retail adding reach.</p>
+    <aside class="note">
+      Four channel types, four trade-offs - control versus reach.<br>
+      Website: most control and best repeat-purchase economics, but Entegro does all the work.<br>
+      Amazon and retail buy reach at the cost of control and margin. People-based builds trust but scales unevenly.<br>
+      Working conclusion: lead with the official website; use the others for reach.
+    </aside>
+  </section>
+
+  <!-- 11 · Channel map diagram -->
+  <section class="slide">
+    <div class="kicker">Go-To-Market Today</div>
+    <h2>The channel map at a glance</h2>
+    <div class="diagram" style="max-width:760px;margin-left:auto;margin-right:auto">
+      <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of channels plotted by control versus reach">
+        <line x1="70" y1="20" x2="70" y2="340" style="stroke:var(--border);stroke-width:2"/>
+        <line x1="70" y1="340" x2="730" y2="340" style="stroke:var(--border);stroke-width:2"/>
+        <line x1="70" y1="180" x2="730" y2="180" style="stroke:var(--border);stroke-width:1;stroke-dasharray:6 6"/>
+        <line x1="400" y1="20" x2="400" y2="340" style="stroke:var(--border);stroke-width:1;stroke-dasharray:6 6"/>
+        <text x="78" y="36" style="fill:var(--muted);font-size:14px">More control ↑</text>
+        <text x="726" y="362" text-anchor="end" style="fill:var(--muted);font-size:14px">More reach →</text>
+        <circle cx="220" cy="80" r="11" style="fill:var(--accent)"/>
+        <text x="240" y="76" style="fill:var(--ink);font-size:16px;font-weight:700">Official website</text>
+        <text x="240" y="95" style="fill:var(--muted);font-size:13px">lead channel: control + repeat purchase</text>
+        <circle cx="150" cy="230" r="9" style="fill:var(--accent-deep)"/>
+        <text x="168" y="227" style="fill:var(--ink);font-size:15px">People-based recommendations</text>
+        <text x="168" y="245" style="fill:var(--muted);font-size:13px">high trust, hard to scale</text>
+        <circle cx="560" cy="260" r="9" style="fill:var(--warn)"/>
+        <text x="578" y="257" style="fill:var(--ink);font-size:15px">Major retailers</text>
+        <text x="578" y="275" style="fill:var(--muted);font-size:13px">reach + credibility, less control</text>
+        <circle cx="640" cy="310" r="9" style="fill:var(--warn)"/>
+        <text x="536" y="330" style="fill:var(--ink);font-size:15px">Amazon</text>
+        <text x="460" y="330" text-anchor="end" style="fill:var(--muted);font-size:0px"> </text>
+        <text x="586" y="330" style="fill:var(--muted);font-size:13px">max reach, price war</text>
+      </svg>
+    </div>
+    <p class="sub wide">Green = where we recommend focusing energy. Amber = reach plays that trade away control. The website earns the repeat purchase; the marketplace and shelf earn the first look.</p>
+    <aside class="note">
+      One picture: control on the vertical, reach on the horizontal.<br>
+      Website sits top-left: most control, moderate reach - the place to build repeat purchase.<br>
+      Amazon and retailers sit bottom-right: reach at the cost of control.<br>
+      People-based sits high-trust but low-scale. Focus follows the green dot.
+    </aside>
+  </section>
+
+  <!-- 12 · Market numbers (probiotics) -->
+  <section class="slide">
+    <div class="kicker">United States Market Landscape</div>
+    <h2>The category is structurally strong…</h2>
+    <div class="grid g3" style="margin-top:3vh">
+      <div>
+        <div class="bignum">$10.5 <span class="unit">billion</span></div>
+        <div class="biglabel">Estimated United States probiotics market, 2026</div>
+      </div>
+      <div>
+        <div class="bignum">~9.5%</div>
+        <div class="biglabel">Forecast yearly growth (compound annual growth rate) through 2031</div>
+      </div>
+      <div>
+        <div class="bignum">40%+</div>
+        <div class="biglabel">United States households buying a probiotic product each year</div>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:5vh">Gut health has moved from niche to mainstream - awareness has roughly tripled since 2015.</p>
+    <aside class="note">
+      $10.5 billion market this year, growing about 9.5% a year.<br>
+      Over 40% of United States households buy a probiotic product each year.<br>
+      Gut health has gone from niche to mainstream.
+    </aside>
+  </section>
+
+  <!-- 13 · Supplements by the numbers -->
+  <section class="slide">
+    <div class="kicker">United States Market Landscape</div>
+    <h2>…and sits inside a huge supplement habit</h2>
+    <div class="grid g3" style="margin-top:3vh">
+      <div>
+        <div class="bignum">~$80 <span class="unit">billion</span></div>
+        <div class="biglabel">United States dietary supplements market, 2026 (analyst estimates range $74-85 billion)</div>
+      </div>
+      <div>
+        <div class="bignum">3 in 4</div>
+        <div class="biglabel">American adults take dietary supplements (Council for Responsible Nutrition consumer survey, 2024)</div>
+      </div>
+      <div>
+        <div class="bignum">$158.6 <span class="unit">billion</span></div>
+        <div class="biglabel">Total United States economic impact of the supplement industry (Council for Responsible Nutrition)</div>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:5vh">Supplements are a mainstream daily habit, not a niche purchase - the category enters the downturn from a position of strength.</p>
+    <aside class="note">
+      Zooming out from probiotics: supplements overall are roughly an $80 billion United States market.<br>
+      Three in four American adults already take them - it's a mainstream daily habit.<br>
+      Industry economic impact: $158.6 billion. The category enters the downturn strong.
+    </aside>
+  </section>
+
+  <!-- 14 · Who is driving demand -->
+  <section class="slide">
+    <div class="kicker">United States Market Landscape</div>
+    <h2>…with younger consumers driving it</h2>
+    <div class="grid g3" style="margin-top:3vh">
+      <div>
+        <div class="bignum">$500 <span class="unit">billion+</span></div>
+        <div class="biglabel">United States wellness spending each year, growing 4-5% annually (McKinsey)</div>
+      </div>
+      <div>
+        <div class="bignum" style="font-size:clamp(28px,3.6vw,54px)">Gen Z +<br>millennials</div>
+        <div class="biglabel">account for a disproportionate share of wellness spending - supplements, probiotics, functional drinks, beauty-from-within</div>
+      </div>
+      <div>
+        <div class="bignum" style="font-size:clamp(28px,3.6vw,54px)">Social<br>first</div>
+        <div class="biglabel">TikTok and Instagram wellness culture, with influencers and celebrities promoting gut health and everyday wellbeing</div>
+      </div>
+    </div>
+    <p class="sub wide" style="margin-top:4vh">Wellness is now a daily lifestyle and self-care routine, not an occasional purchase - but buyers are increasingly selective: trust, credibility, clear benefits and convenience decide the purchase.</p>
+    <aside class="note">
+      Wellness overall: more than $500 billion a year in the United States, growing 4-5%.<br>
+      Gen Z and millennials over-index on wellness spending and treat it as a daily routine.<br>
+      TikTok and Instagram make gut health visible; influencers drive discovery.<br>
+      But the market is crowded - trust, credibility, clear benefits and convenience win.
+    </aside>
+  </section>
+
+  <!-- 15 · The squeeze -->
+  <section class="slide">
+    <div class="kicker">United States Market Landscape</div>
+    <h2>…but the consumer is squeezed</h2>
+    <div class="grid g3" style="margin-top:3vh">
+      <div>
+        <div class="bignum warn">+4.2%</div>
+        <div class="biglabel">Consumer Price Index, year to May 2026 (energy +23.5%, food +3.1%) - United States Bureau of Labor Statistics</div>
+      </div>
+      <div>
+        <div class="bignum warn">57%</div>
+        <div class="biglabel">of supplement users have changed how they buy: private label, bulk, cheaper alternatives</div>
+      </div>
+      <div>
+        <div class="bignum">4%</div>
+        <div class="biglabel">stopped buying supplements altogether - health spending is protected, not immune</div>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:5vh">Nuance: the viral "Costco trade-down" story is selective - premium proteins are growing; cuts fall on discretionary spend. Wellness survives downturns when the value story is clear.</p>
+    <aside class="note">
+      Inflation 4.2% for the year; energy up 23.5%.<br>
+      57% of supplement users changed how they buy - but only 4% stopped buying.<br>
+      Costco trade-down story is selective: health spending is protected.<br>
+      The real question: is the value story clear enough?
+    </aside>
+  </section>
+
+  <!-- 16 · How consumers judge value (+ flow diagram) -->
+  <section class="slide">
+    <div class="kicker">United States Market Landscape</div>
+    <h2>Under pressure, buyers sort products into three piles</h2>
+    <ul class="points">
+      <li><strong>Value is judged beyond price</strong> - ingredient quality, transparency, ethical impact and product relevance all count, not just the cheapest option.</li>
+      <li><strong>Spending splits into essentials, small treats, and non-essentials</strong> - and the non-essential pile gets cut first.</li>
+      <li><strong>Wellness products survive when they feel essential</strong> - part of daily wellbeing, not an optional add-on.</li>
+    </ul>
+    <div class="flow">
+      <div class="step">Economic pressure</div>
+      <div class="arr">→</div>
+      <div class="step">Buyers become selective</div>
+      <div class="arr">→</div>
+      <div class="step">Products must feel essential, not optional</div>
+      <div class="arr">→</div>
+      <div class="step last">Sell the daily routine, not the one-off trial</div>
+    </div>
+    <aside class="note">
+      Selective consumers judge value broadly: quality, transparency, ethics, relevance.<br>
+      Mental sorting: essentials, small treats, non-essentials - the last pile gets cut.<br>
+      Flourish must land in the "essential daily routine" pile.<br>
+      Walk the arrow chain: pressure → selective → essential → sell the monthly routine.
+    </aside>
+  </section>
+
+  <!-- 17 · Implications -->
+  <section class="slide">
+    <div class="kicker">Strategic Implications</div>
+    <h2>Where Weeks 2-4 should dig</h2>
+    <ul class="points">
+      <li><strong>Clarify the core buyer</strong> - sufferers, optimisers, parents, or practitioner-referred? Pick, don't average.</li>
+      <li><strong>Make evidence unmissable</strong> - third-party testing and strain science on every surface.</li>
+      <li><strong>Reduce trial friction</strong> - TO GO packs, first-order discount, the 30-day challenge.</li>
+      <li><strong>Recession-proof the value story</strong> - about $1.17 a day, subscription savings, family use cases.</li>
+      <li><strong>Prioritise channels</strong> - partners build trust; direct-to-consumer subscription drives margin. Don't grow everything equally.</li>
+    </ul>
+    <aside class="note">
+      Five moves: pick one core buyer; make the evidence unmissable;<br>
+      lower trial friction; lead with the $1.17-a-day value story;<br>
+      prioritise channels - partners build trust, subscription drives margin.
+    </aside>
+  </section>
+
+  <!-- 18 · Recommendation -->
+  <section class="slide">
+    <div class="kicker">Our Recommendation</div>
+    <h2>Make Flourish the daily wellness habit - sold direct</h2>
+    <ul class="points">
+      <li><strong>Position as a daily essential</strong> - everyday wellness for the whole household, not an optional supplement to try once.</li>
+      <li><strong>Lead with the official website</strong> - the channel with the most control over pricing, customer data and repeat purchase; push starter kits and subscription benefits.</li>
+      <li><strong>Differentiate by taste and occasion</strong> - Junior's milder taste for first-timers and families; TO GO for on-the-go; same trusted formula everywhere.</li>
+      <li><strong>Make credibility unmissable</strong> - clean label, third-party testing on every batch, and the 30-day money-back guarantee, front and centre.</li>
+      <li><strong>Meet younger buyers on social</strong> - short-form gut-health content for Gen Z and millennial wellness culture, always tied to credible, clear benefits.</li>
+    </ul>
+    <p class="sub wide">Weeks 2-4 will pressure-test these against downturn case studies and competitor moves before the final strategy.</p>
+    <aside class="note">
+      Five recommendations: daily-essential positioning; website-first channel strategy;<br>
+      taste-and-occasion differentiation; credibility (clean label, testing, guarantee) up front;<br>
+      short-form social for younger wellness buyers.<br>
+      Frame as working hypotheses - Weeks 2-4 will pressure-test them.
+    </aside>
+  </section>
+
+  <!-- 19 · Road map: weekly recommendations -->
+  <section class="slide">
+    <div class="kicker">Road Map</div>
+    <h2>Every weekly document ends with recommendations</h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Week 1 - this briefing</h3>
+        <p>Product, company and market baseline. <strong>Closes with:</strong> the daily-essential positioning and website-first hypotheses you've just seen.</p>
+      </div>
+      <div class="card">
+        <h3>Week 2 - downturn playbook</h3>
+        <p>Research report: what consumer packaged goods brands did in past recessions, with case studies. <strong>Closes with:</strong> recommended pricing, promotion and distribution tactics for Entegro.</p>
+      </div>
+      <div class="card">
+        <h3>Week 3 - competitive intelligence</h3>
+        <p>Deep-dive on supplement and wellness competitors' responses to this economy. <strong>Closes with:</strong> recommended differentiation gaps, plus validation of the personas and the new-niche hypothesis.</p>
+      </div>
+      <div class="card">
+        <h3>Week 4 - final strategy</h3>
+        <p>15-20 minute presentation to leadership. <strong>Closes with:</strong> a recommended go-to-market strategy and 2-3 tactics Entegro can deploy immediately.</p>
+      </div>
+    </div>
+    <aside class="note">
+      Each weekly deliverable ends with recommendations, building to the final strategy.<br>
+      Week 2: tactics from recession case studies. Week 3: competitor gaps + persona/niche validation.<br>
+      Week 4: the strategy with 2-3 immediately deployable tactics.
+    </aside>
+  </section>
+
+  <!-- 20 · Questions -->
+  <section class="slide">
+    <div class="kicker">Questions for You</div>
+    <h2>What we'd like to know, Nikhil</h2>
+    <ul class="points">
+      <li>Could we book a short go-to-market session with you or Carlos - to combine real channel data with our research?</li>
+      <li>Which channel drives most revenue today - and where's the fastest headroom?</li>
+      <li>What do subscription retention and customer acquisition costs look like?</li>
+      <li>Where do Amazon and retail (for example, Walmart) sit in current plans?</li>
+      <li>Is the "sold out" status on Flourish Original a supply constraint we should plan around?</li>
+      <li>How would you like findings reported each week?</li>
+    </ul>
+    <aside class="note">
+      Ask all six, then stop talking and take notes.<br>
+      Priority: lock in the go-to-market session with Nikhil or Carlos - team action item.<br>
+      Revenue mix · retention and acquisition costs · Amazon/Walmart plans · supply · reporting format.
+    </aside>
+  </section>
+
+  <!-- 21 · Close -->
+  <section class="slide">
+    <div class="titlewrap">
+      <div class="kicker">Thank you</div>
+      <h1>Next: recession-proof tactics from past downturns</h1>
+      <p class="sub">Week 2 - what successful consumer packaged goods brands did in previous recessions: pricing, distribution pivots, promotions, and messaging shifts. Full sources in the accompanying Week 1 briefing document.</p>
+    </div>
+    <aside class="note">
+      Week 2 = downturn tactics from consumer packaged goods history.<br>
+      Point to the written briefing for full sources. Thank him and close.
+    </aside>
+  </section>
+
+</div>
+
+<div id="notesPanel"><div class="note-title">Speaker notes</div><div id="notesBody"></div></div>
+
+<div class="counter" id="counter">1 / 21</div>
+<div class="navhint">← → arrow keys · space · N for notes</div>
+<div class="navbtns">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <button id="notes" aria-label="Toggle speaker notes">Notes</button>
+  <button id="next" aria-label="Next slide">→</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  const notesPanel = document.getElementById("notesPanel");
+  const notesBody = document.getElementById("notesBody");
+  const notesBtn = document.getElementById("notes");
+  let idx = 0;
+  let notesOn = false;
+
+  function renderNotes() {
+    const note = slides[idx].querySelector(".note");
+    notesBody.innerHTML = note ? note.innerHTML : "No notes for this slide.";
+    notesPanel.style.display = notesOn ? "block" : "none";
+    notesBtn.classList.toggle("on", notesOn);
+  }
+
+  function show(n) {
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, i) => s.classList.toggle("active", i === idx));
+    document.getElementById("counter").textContent = (idx + 1) + " / " + slides.length;
+    document.getElementById("progress").style.width = ((idx + 1) / slides.length * 100) + "%";
+    renderNotes();
+  }
+
+  function toggleNotes() {
+    notesOn = !notesOn;
+    renderNotes();
+  }
+
+  document.getElementById("next").addEventListener("click", () => show(idx + 1));
+  document.getElementById("prev").addEventListener("click", () => show(idx - 1));
+  notesBtn.addEventListener("click", toggleNotes);
+
+  document.addEventListener("keydown", (e) => {
+    if (["ArrowRight", " ", "PageDown"].includes(e.key)) { e.preventDefault(); show(idx + 1); }
+    if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(idx - 1); }
+    if (e.key === "Home") show(0);
+    if (e.key === "End") show(slides.length - 1);
+    if (e.key === "n" || e.key === "N") toggleNotes();
+  });
+
+  // touch swipe for tablets
+  let x0 = null;
+  document.addEventListener("touchstart", e => x0 = e.touches[0].clientX);
+  document.addEventListener("touchend", e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+
+  show(0);
+</script>
+</body>
+</html>
