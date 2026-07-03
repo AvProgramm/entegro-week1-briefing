@@ -85,6 +85,14 @@
   .footer-note { position: absolute; bottom: 3.2vh; left: 8vw; right: 8vw;
     color: var(--muted); font-size: clamp(11px, 1.05vw, 14px); }
 
+  /* references */
+  ul.refs { list-style: none; margin-top: 6px; columns: 2; column-gap: 40px; }
+  ul.refs li { position: relative; padding: 5px 0 5px 22px; break-inside: avoid;
+    font-size: clamp(11px, 1.15vw, 15px); line-height: 1.45; color: #cfe0d7; }
+  ul.refs li::before { content: "▪"; position: absolute; left: 2px; color: var(--accent); }
+  ul.refs li strong { color: var(--ink); }
+  ul.refs li em { color: var(--muted); font-style: normal; }
+
   /* speaker notes */
   .note { display: none; }
   #notesPanel {
@@ -671,11 +679,40 @@
     </aside>
   </section>
 
+  <!-- 22 · References -->
+  <section class="slide">
+    <div class="kicker">References</div>
+    <h2>Where the data on these slides comes from</h2>
+    <ul class="refs">
+      <li><strong>Entegro Health</strong> - product range, prices, formulation claims, reviews, partner programmes <em>entegrohealth.com · entegrohealth.myshopify.com (accessed 2 July 2026)</em></li>
+      <li><strong>Time to First Bite</strong> - services, approach, case studies <em>timetofirstbite.com</em></li>
+      <li><strong>United States Bureau of Labor Statistics</strong> - Consumer Price Index Summary, May 2026 (+4.2%; energy +23.5%; food +3.1%) <em>bls.gov</em></li>
+      <li><strong>United States Bureau of Economic Analysis</strong> - Personal Income and Outlays, May 2026 <em>bea.gov</em></li>
+      <li><strong>MarketsandMarkets</strong> - Probiotic Supplement Market 2026-2031 ($10.5 billion, ~9.5% yearly growth) · <strong>Fortune Business Insights</strong> - Probiotics Market</li>
+      <li><strong>Grand View Research</strong> - United States Dietary Supplements Market (~$80 billion, 2026)</li>
+      <li><strong>Council for Responsible Nutrition</strong> - 2024 consumer survey (3 in 4 American adults) · industry economic impact ($158.6 billion) <em>crnusa.org</em></li>
+      <li><strong>McKinsey &amp; Company</strong> - The Future of Wellness ($500 billion+, 4-5% growth, Gen Z and millennial share) <em>mckinsey.com</em></li>
+      <li><strong>Future Market Insights</strong> - United States Probiotic Supplement Market</li>
+      <li><strong>NIQ (NielsenIQ)</strong> - From Inflation to Intention: How U.S. Consumers Are Redefining Value in 2026 (57% changed how they buy)</li>
+      <li><strong>New Hope Network · WholeFoods Magazine</strong> - supplement consumer behaviour under inflation (only 4% stopped buying)</li>
+      <li><strong>Grocery Dive</strong> - Costco third-quarter fiscal 2026 earnings coverage (premium proteins growing; selective trade-down)</li>
+      <li><strong>National Institutes of Health, Office of Dietary Supplements</strong> - Probiotics Fact Sheet · <strong>National Center for Complementary and Integrative Health</strong> - Probiotics: Usefulness and Safety</li>
+      <li><strong>Netflix</strong> - Hack Your Health: The Secrets of Your Gut (gut-health cultural moment)</li>
+      <li><strong>Week 1 written briefing</strong> - full findings and complete source list accompany this deck</li>
+    </ul>
+    <aside class="note">
+      Every number on the previous slides traces to one of these sources.<br>
+      Market sizes: MarketsandMarkets, Grand View, McKinsey. Consumer behaviour: NielsenIQ, Council for Responsible Nutrition.<br>
+      Economics: Bureau of Labor Statistics and Bureau of Economic Analysis. Product facts: Entegro's own site.<br>
+      Full clickable links live in the written briefing document.
+    </aside>
+  </section>
+
 </div>
 
 <div id="notesPanel"><div class="note-title">Speaker notes</div><div id="notesBody"></div></div>
 
-<div class="counter" id="counter">1 / 21</div>
+<div class="counter" id="counter">1 / 22</div>
 <div class="navhint">← → arrow keys · space · N for notes</div>
 <div class="navbtns">
   <button id="prev" aria-label="Previous slide">←</button>
